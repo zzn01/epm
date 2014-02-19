@@ -306,7 +306,7 @@ extern int	make_portable(const char *prodname, const char *directory,
 extern int	make_rpm(int format, const char *prodname, const char *directory,
 		         const char *platname, dist_t *dist,
 			 struct utsname *platform, const char *setup,
-			 const char *types);
+			 const char *types,const char *local);
 extern int	make_setld(const char *prodname, const char *directory,
 		           const char *platname, dist_t *dist,
 			   struct utsname *platform);

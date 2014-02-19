@@ -66,6 +66,7 @@ main(int  argc,				/* I - Number of command-line args */
   char		*namefmt,		/* Name format to use */
 		*custom_name,		/* User-supplied system name */
 		platname[255],		/* Base platform name */
+		local_machine[256],		/* local machine name get from `uname`*/
 		prodname[256],		/* Product name */
 		listname[256],		/* List file name */
 		directory[255],		/* Name of install directory */
@@ -96,6 +97,10 @@ main(int  argc,				/* I - Number of command-line args */
   */
 
   get_platform(&platform);
+
+  /* save `uname` machine name*/
+  strncpy(local_machine,platform.machine,sizeof(local_machine));
+  local_machine[255]=0;
 
  /*
   * Check arguments...
@@ -580,7 +585,7 @@ main(int  argc,				/* I - Number of command-line args */
     case PACKAGE_RPM :
     case PACKAGE_RPM_SIGNED :
         i = make_rpm(format, prodname, directory, platname, dist, &platform,
-	             setup, types);
+	             setup, types,local_machine);
 	break;
     case PACKAGE_SETLD :
         if (geteuid())

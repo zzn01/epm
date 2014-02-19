@@ -54,7 +54,8 @@ make_rpm(int            format,		/* I - Subformat */
          dist_t         *dist,		/* I - Distribution information */
 	 struct utsname *platform,	/* I - Platform information */
          const char     *setup,		/* I - Setup GUI image */
-         const char     *types)		/* I - Setup GUI install types */
+         const char     *types,		/* I - Setup GUI install types */
+         const char     *local_machine)   /* local machine id*/
 {
   int		i;			/* Looping var */
   FILE		*fp;			/* Spec file */
@@ -142,13 +143,8 @@ make_rpm(int            format,		/* I - Subformat */
   snprintf(filename, sizeof(filename), "%s/rpms", directory);
   symlink("RPMS", filename);
 
-  if (!strcmp(platform->machine, "intel"))
-    snprintf(filename, sizeof(filename), "%s/RPMS/i386", directory);
-  else if (!strcmp(platform->machine, "ppc"))
-    snprintf(filename, sizeof(filename), "%s/RPMS/powerpc", directory);
-  else
-    snprintf(filename, sizeof(filename), "%s/RPMS/%s", directory,
-             platform->machine);
+  snprintf(filename, sizeof(filename), "%s/RPMS/%s", directory,
+          platform->machine);
 
   make_directory(filename, 0777, getuid(), getgid());
 
@@ -235,25 +231,24 @@ make_rpm(int            format,		/* I - Subformat */
     build_option = "-signed ";
   else
     build_option = "";
-
-  if (!strcmp(platform->machine, "intel"))
+  if (strcmp(platform->machine, local_machine)==0)
   {
+    printf(EPM_RPMBUILD " -bb --buildroot \"%s/buildroot\" "
+                          "%s %s \n", absdir, build_option,specname);
     if (run_command(NULL, EPM_RPMBUILD " -bb --buildroot \"%s/buildroot\" "
-                          EPM_RPMARCH "i386 %s%s", absdir, build_option,
-			  specname))
+                          "%s %s", absdir, build_option,specname))
       return (1);
   }
-  else if (!strcmp(platform->machine, "ppc"))
-  {
-    if (run_command(NULL, EPM_RPMBUILD " -bb --buildroot \"%s/buildroot\" "
-                          EPM_RPMARCH "powerpc %s%s", absdir, build_option,
-			  specname))
-      return (1);
-  }
-  else if (run_command(NULL, EPM_RPMBUILD " -bb --buildroot \"%s/buildroot\" "
+  else{
+      printf(EPM_RPMBUILD " -bb --buildroot \"%s/buildroot\" "
+                       EPM_RPMARCH "%s %s%s\n", absdir, platform->machine,
+		       build_option, specname);
+      if (run_command(NULL, EPM_RPMBUILD " -bb --buildroot \"%s/buildroot\" "
                        EPM_RPMARCH "%s %s%s", absdir, platform->machine,
 		       build_option, specname))
-    return (1);
+          return (1);
+
+  }
 
  /*
   * Move the RPMs to the local directory and rename the RPMs using the
@@ -538,18 +533,9 @@ move_rpms(const char     *prodname,	/* I - Product short name */
 
   strlcat(rpmname, ".rpm", sizeof(rpmname));
 
-  if (!strcmp(platform->machine, "intel"))
-    run_command(NULL, "/bin/mv %s/RPMS/i386/%s-%s-%s.i386.rpm %s",
-		rpmdir, prodfull, dist->version, release,
-		rpmname);
-  else if (!strcmp(platform->machine, "ppc"))
-    run_command(NULL, "/bin/mv %s/RPMS/powerpc/%s-%s-%s.powerpc.rpm %s",
-		rpmdir, prodfull, dist->version, release,
-		rpmname);
-  else
-    run_command(NULL, "/bin/mv %s/RPMS/%s/%s-%s-%s.%s.rpm %s",
-		rpmdir, platform->machine, prodfull, dist->version,
-		release, platform->machine, rpmname);
+  run_command(NULL, "/bin/mv %s/RPMS/%s/%s-%s-%s.%s.rpm %s",
+          rpmdir, platform->machine, prodfull, dist->version,
+          release, platform->machine, rpmname);
 
   if (Verbosity)
   {
