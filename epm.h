@@ -202,6 +202,13 @@ typedef struct				/**** Dependencies ****/
   const char	*subpackage;		/* Sub-package name */
 } depend_t;
 
+typedef struct				/**** Tags Structure ****/
+{
+  char		*tag;		/* tags*/
+  const char	*subpackage;		/* Sub-package name */
+} tag_t;
+
+
 typedef struct				/**** Description Structure ****/
 {
   char		*description;		/* Description */
@@ -222,6 +229,8 @@ typedef struct				/**** Distribution Structure ****/
   char		**subpackages;		/* Subpackage names */
   int		num_descriptions;	/* Number of description strings */
   description_t	*descriptions;		/* Description strings */
+  int      num_tags;
+  tag_t    *tags;           /*tag string for rpm*/
   int		vernumber,		/* Version number */
 		epoch;			/* Epoch number */
   int		num_commands;		/* Number of commands */

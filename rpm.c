@@ -603,9 +603,10 @@ write_spec(int        format,		/* I - Subformat */
     fprintf(fp, "Summary: %s", dist->product);
 
     for (i = 0; i < dist->num_descriptions; i ++)
+    {
       if (dist->descriptions[i].subpackage == subpackage)
-	break;
-
+        break;
+    }
     if (i < dist->num_descriptions)
     {
       char	line[1024],		/* First line of description... */
@@ -619,16 +620,19 @@ write_spec(int        format,		/* I - Subformat */
       fprintf(fp, " - %s", line);
     }
     fputs("\n", fp);
+
+
   }
   else
+  {
     fprintf(fp, "Summary: %s\n", dist->product);
+  }
 
   fputs("Group: Applications\n", fp);
 
  /*
   * List all of the dependencies...
   */
-
   for (i = dist->num_depends, d = dist->depends; i > 0; i --, d ++)
   {
     if (d->subpackage != subpackage)
@@ -896,6 +900,27 @@ write_spec(int        format,		/* I - Subformat */
     for (; i > 0; i --, c ++)
       if (c->type == COMMAND_POST_REMOVE && c->subpackage == subpackage)
 	fprintf(fp, "%s\n", c->command);
+  }
+
+  /*
+   * zzn, Mon May 27 13:46:17 EDT 2013
+   * Tag 
+   */
+  for (i = 0; i < dist->num_tags; i ++)
+  {
+      if (dist->tags[i].subpackage == subpackage)
+        break;
+  }
+  if (i < dist->num_tags)
+  {
+      char	line[1024],		/* First line of description... */
+		*ptr;			/* Pointer into line */
+
+      strlcpy(line, dist->tags[i].tag, sizeof(line));
+      if ((ptr = strchr(line, '\n')) != NULL)
+        *ptr = '\0';
+
+      fprintf(fp, "%s\n", line);
   }
 
  /*

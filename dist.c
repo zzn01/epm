@@ -297,6 +297,42 @@ add_depend(dist_t     *dist,		/* I - Distribution */
   }
 }
 
+/*
+ * get all tags for rpm
+ * */
+void
+add_tags(dist_t     *dist,	/* I - Distribution */
+                FILE       *fp,		/* I - Source file */
+                const char *tag,    /* I - Tags string */
+                const char *subpkg)	/* I - Subpackage name */
+{
+  tag_t  *temp;			/* Temporary tags array */
+
+  if (tag== NULL)
+    return;
+
+  if (dist->num_tags== 0)
+    temp = malloc(sizeof(tag_t));
+  else
+    temp = realloc(dist->tags,
+                   (dist->num_tags+ 1) * sizeof(tag_t));
+
+  if (temp == NULL)
+  {
+    perror("epm: Out of memory adding description");
+    return;
+  }
+
+  dist->tags= temp;
+  temp += dist->num_tags;
+  dist->num_tags++;
+
+  temp->subpackage = subpkg;
+
+  if ((temp->tag= strdup(tag)) == NULL)
+    perror("epm: Out of memory duplicating description");
+}
+
 
 /*
  * 'add_description()' - Add a description to the distribution.
@@ -859,6 +895,8 @@ read_dist(const char     *filename,	/* I - Main distribution list file */
 	}
 	else if (!strcmp(line, "%description"))
 	  add_description(dist, listfiles[listlevel], temp, subpkg);
+	else if (!strcmp(line, "%tag"))
+	  add_tags(dist, listfiles[listlevel], temp, subpkg);
 	else if (!strcmp(line, "%preinstall"))
           add_command(dist, listfiles[listlevel], COMMAND_PRE_INSTALL, temp,
 	              subpkg, NULL);
