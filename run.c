@@ -56,8 +56,9 @@ run_command(const char *directory,	/* I - Directory for command or NULL */
   vsnprintf(argbuf, sizeof(argbuf) - 1, command, ap);
   argbuf[sizeof(argbuf) - 1] = '\0';
 
-  if (Verbosity > 1)
+  if (Verbosity > 1){
     puts(argbuf);
+  }
 
  /*
   * Parse the argument string; arguments can be separated by whitespace
@@ -66,50 +67,54 @@ run_command(const char *directory,	/* I - Directory for command or NULL */
 
   argv[0] = argbuf;
 
-  for (argptr = argbuf, argc = 1; *argptr != '\0' && argc < 99; argptr ++)
-    if (isspace(*argptr & 255))
-    {
+  for (argptr = argbuf, argc = 1; *argptr != '\0' && argc < 99; argptr ++){
+    if (isspace(*argptr & 255)){
       *argptr++ = '\0';
 
       while (isspace(*argptr & 255))
+      {
         argptr ++;
+      }
 
       if (*argptr != '\0')
       {
         argv[argc] = argptr;
-	argc ++;
+        argc ++;
       }
 
       argptr --;
     }
-    else if (*argptr == '\'')
-    {
+    else if (*argptr == '\''){
       if (argptr == argv[argc - 1])
         argv[argc - 1] ++;
 
-      for (argptr ++; *argptr && *argptr != '\''; argptr ++)
-        if (*argptr == '\\' && argptr[1])
-	  strcpy(argptr, argptr + 1);
+      for (argptr ++; *argptr && *argptr != '\''; argptr ++){
+        if (*argptr == '\\' && argptr[1]){
+            memmove(argptr,argptr + 1,strlen(argptr));
+        }
+      }
 
-      if (*argptr == '\'')
-        strcpy(argptr, argptr + 1);
+      if (*argptr == '\''){
+          memmove(argptr,argptr + 1,strlen(argptr));
+      }
 
       argptr --;
     }
-    else if (*argptr == '\"')
-    {
+    else if (*argptr == '\"'){
       if (argptr == argv[argc - 1])
         argv[argc - 1] ++;
 
       for (argptr ++; *argptr && *argptr != '\"'; argptr ++)
         if (*argptr == '\\' && argptr[1])
-	  strcpy(argptr, argptr + 1);
+            memmove(argptr,argptr + 1,strlen(argptr));
 
       if (*argptr == '\"')
-        strcpy(argptr, argptr + 1);
+            memmove(argptr,argptr + 1,strlen(argptr));
 
       argptr --;
     }
+
+  }
 
   argv[argc] = NULL;
 
